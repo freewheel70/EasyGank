@@ -70,7 +70,8 @@ public class PictureActivity extends BaseToolbarActivity
 
     private static final String SHARED_ELEMENT_NAME = "PictureActivity";
 
-    @Bind(R.id.picture_iv) ImageView pictureIV;
+    @Bind(R.id.picture_iv)
+    ImageView pictureIV;
 
     private PicturePresenter presenter;
 

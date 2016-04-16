@@ -300,6 +300,8 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     public void switchType(int type) {
+        Log.d(TAG, "switchType() called with: " + "type = [" + type + "]");
+
         /*
          * 记录没切换前的数据的页数
          * 以防切换数据后，网络又跪导致的page对不上问题
