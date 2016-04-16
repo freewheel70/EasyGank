@@ -22,7 +22,7 @@
  * <http://www.gnu.org/philosophy/why-not-lgpl.html>.
  */
 
-package com.camnter.easygank.gank;
+package com.camnter.easygank.network;
 
 import android.util.SparseArray;
 import com.camnter.easygank.R;
@@ -41,6 +41,7 @@ public class GankTypeDict {
     public static int[] menuIds = new int[] { R.id.navigation_daily, R.id.navigation_welfare,
             R.id.navigation_android, R.id.navigation_ios, R.id.navigation_js, R.id.navigation_video,
             R.id.navigation_resources, R.id.navigation_app };
+
     public static final SparseArray<Integer> menuId2TypeDict = new SparseArray<>();
 
     public static final HashMap<Integer, String> type2UrlTypeDict = new HashMap<>();

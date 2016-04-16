@@ -56,14 +56,18 @@ public class ToastUtils {
 
     private static Runnable run = new Runnable() {
         public void run() {
-            if (normalToast != null) normalToast.cancel();
-            if (gravityToast != null) gravityToast.cancel();
+            if (normalToast != null)
+                normalToast.cancel();
+
+            if (gravityToast != null)
+                gravityToast.cancel();
         }
     };
 
 
     private static void toast(Context context, CharSequence text, int duration) {
-        if (context == null) return;
+        if (context == null)
+            return;
         handler.removeCallbacks(run);
         long delayMillis;
         switch (duration) {
@@ -98,6 +102,7 @@ public class ToastUtils {
                 delayMillis = DEFAULT_DURATION;
                 break;
         }
+
         if (gravityToast == null) {
             gravityToast = android.widget.Toast.makeText(context, text, duration);
         } else {

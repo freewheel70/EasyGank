@@ -22,39 +22,21 @@
  * <http://www.gnu.org/philosophy/why-not-lgpl.html>.
  */
 
-package com.camnter.easygank.gank;
-
-import com.camnter.easygank.bean.GankDaily;
-import com.camnter.easygank.bean.GankData;
-import retrofit.http.GET;
-import retrofit.http.Path;
-import rx.Observable;
+package com.camnter.easygank.network;
 
 /**
- * Description：GankService
+ * Description：GankType
  * Created by：CaMnter
- * Time：2016-01-03 16:18
+ * Time：2016-01-06 16:35
  */
-public interface GankService {
-
-    /**
-     * @param year year
-     * @param month month
-     * @param day day
-     * @return Observable<GankDaily>
-     */
-    @GET("day/{year}/{month}/{day}") Observable<GankDaily> getDaily(
-            @Path("year") int year, @Path("month") int month, @Path("day") int day);
-
-    /**
-     * 找妹子、Android、iOS、前端、扩展资源、休息视频
-     *
-     * @param type 数据类型
-     * @param size 数据个数
-     * @param page 第几页
-     * @return Observable<GankWelfare>
-     */
-    @GET("data/{type}/{size}/{page}") Observable<GankData> getData(
-            @Path("type") String type, @Path("size") int size, @Path("page") int page);
+public class GankType {
+    public static final int daily = 22061;
+    public static final int android = 22062;
+    public static final int ios = 22063;
+    public static final int js = 22064;
+    public static final int resources = 22065;
+    public static final int welfare = 22066;
+    public static final int video = 22067;
+    public static final int app = 22068;
+    public static final int recommend = 22060;
 }
-

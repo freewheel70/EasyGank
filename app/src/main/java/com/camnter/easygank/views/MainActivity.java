@@ -31,33 +31,41 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-import butterknife.Bind;
+
 import com.camnter.easygank.R;
 import com.camnter.easygank.adapter.MainAdapter;
 import com.camnter.easygank.bean.BaseGankData;
 import com.camnter.easygank.bean.GankDaily;
 import com.camnter.easygank.constant.Constant;
 import com.camnter.easygank.core.BaseDrawerLayoutActivity;
-import com.camnter.easygank.gank.GankApi;
-import com.camnter.easygank.gank.GankType;
-import com.camnter.easygank.gank.GankTypeDict;
+import com.camnter.easygank.network.GankApi;
+import com.camnter.easygank.network.GankType;
+import com.camnter.easygank.network.GankTypeDict;
 import com.camnter.easygank.presenter.MainPresenter;
 import com.camnter.easygank.presenter.iview.MainView;
+import com.camnter.easygank.utils.ToastUtils;
 import com.camnter.easyrecyclerview.widget.EasyRecyclerView;
 import com.camnter.easyrecyclerview.widget.decorator.EasyBorderDividerItemDecoration;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.update.UmengUpdateAgent;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.Bind;
 
 public class MainActivity extends BaseDrawerLayoutActivity
         implements MainView, MainAdapter.OnClickListener {
 
-    @Bind(R.id.main_rv) EasyRecyclerView mainRv;
+    private static final String TAG = "MainActivity";
+
+    @Bind(R.id.main_rv)
+    EasyRecyclerView mainRv;
 
     private EasyBorderDividerItemDecoration dataDecoration;
     private EasyBorderDividerItemDecoration welfareDecoration;
@@ -77,7 +85,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
      *
      * @return layout id
      */
-    @Override protected int getLayoutId() {
+    @Override
+    protected int getLayoutId() {
         return R.layout.activity_main;
     }
 
@@ -85,12 +94,14 @@ public class MainActivity extends BaseDrawerLayoutActivity
     /**
      * 刷新的时候
      */
-    @Override public void onSwipeRefresh() {
+    @Override
+    public void onSwipeRefresh() {
         this.refreshData(this.gankType);
     }
 
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
         this.getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -102,7 +113,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
      * proceed, true to consume it here.
      * @see #onCreateOptionsMenu
      */
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_main_about:
                 AboutActivity.startActivity(this);
@@ -124,15 +136,16 @@ public class MainActivity extends BaseDrawerLayoutActivity
      *
      * @param savedInstanceState savedInstanceState
      */
-    @Override protected void initViews(Bundle savedInstanceState) {
+    @Override
+    protected void initViews(Bundle savedInstanceState) {
         this.dataDecoration = new EasyBorderDividerItemDecoration(
                 this.getResources().getDimensionPixelOffset(R.dimen.data_border_divider_height),
                 this.getResources()
-                    .getDimensionPixelOffset(R.dimen.data_border_padding_infra_spans));
+                        .getDimensionPixelOffset(R.dimen.data_border_padding_infra_spans));
         this.welfareDecoration = new EasyBorderDividerItemDecoration(
                 this.getResources().getDimensionPixelOffset(R.dimen.welfare_border_divider_height),
                 this.getResources()
-                    .getDimensionPixelOffset(R.dimen.welfare_border_padding_infra_spans));
+                        .getDimensionPixelOffset(R.dimen.welfare_border_padding_infra_spans));
         this.mainRv.addItemDecoration(this.dataDecoration);
         this.mLinearLayoutManager = (LinearLayoutManager) this.mainRv.getLayoutManager();
         this.mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(2,
@@ -146,7 +159,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
     /**
      * Initialize the View of the listener
      */
-    @Override protected void initListeners() {
+    @Override
+    protected void initListeners() {
         this.mainRv.addOnScrollListener(this.getRecyclerViewOnScrollListener());
         this.mainAdapter.setOnItemClickListener((view, position) -> {
             Object o = MainActivity.this.mainAdapter.getItem(position);
@@ -177,7 +191,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
             private boolean toLast = false;
 
 
-            @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 /*
                  * dy 表示y轴滑动方向
                  * dx 表示x轴滑动方向
@@ -192,7 +207,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
             }
 
 
-            @Override public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
                 if (layoutManager instanceof LinearLayoutManager) {
                     LinearLayoutManager manager = (LinearLayoutManager) layoutManager;
@@ -231,7 +247,7 @@ public class MainActivity extends BaseDrawerLayoutActivity
     private void loadMoreRequest() {
         // 没数据了
         if (this.emptyCount >= EMPTY_LIMIT) {
-            this.showToast(MainActivity.this.getString(R.string.main_empty_data),
+            ToastUtils.show(MainActivity.this, getString(R.string.main_empty_data),
                     Toast.LENGTH_LONG);
             return;
         }
@@ -273,7 +289,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
     /**
      * Initialize the Activity data
      */
-    @Override protected void initData() {
+    @Override
+    protected void initData() {
         this.presenter = new MainPresenter();
         this.presenter.attachView(this);
         this.gankType = GankType.daily;
@@ -313,9 +330,10 @@ public class MainActivity extends BaseDrawerLayoutActivity
      * 查询每日干货成功
      *
      * @param dailyData dailyData
-     * @param refresh 是否刷新
+     * @param refresh   是否刷新
      */
-    @Override public void onGetDailySuccess(List<GankDaily> dailyData, boolean refresh) {
+    @Override
+    public void onGetDailySuccess(List<GankDaily> dailyData, boolean refresh) {
         if (refresh) {
             this.emptyCount = 0;
             this.mainAdapter.clear();
@@ -332,10 +350,11 @@ public class MainActivity extends BaseDrawerLayoutActivity
     /**
      * 查询 ( Android、iOS、前端、拓展资源、福利、休息视频 ) 成功
      *
-     * @param data data
+     * @param data    data
      * @param refresh 是否刷新
      */
-    @Override public void onGetDataSuccess(List<BaseGankData> data, boolean refresh) {
+    @Override
+    public void onGetDataSuccess(List<BaseGankData> data, boolean refresh) {
         if (refresh) {
             this.emptyCount = 0;
             this.mainAdapter.clear();
@@ -354,7 +373,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
      *
      * @param type type
      */
-    @Override public void onSwitchSuccess(int type) {
+    @Override
+    public void onSwitchSuccess(int type) {
         this.emptyCount = 0;
         this.mainAdapter.setType(type);
         this.mainAdapter.clear();
@@ -386,10 +406,11 @@ public class MainActivity extends BaseDrawerLayoutActivity
     /**
      * 获取每日详情数据
      *
-     * @param title title
+     * @param title  title
      * @param detail detail
      */
-    @Override public void getDailyDetail(String title, ArrayList<ArrayList<BaseGankData>> detail) {
+    @Override
+    public void getDailyDetail(String title, ArrayList<ArrayList<BaseGankData>> detail) {
         DailyDetailActivity.startActivity(this, title, detail);
     }
 
@@ -405,14 +426,18 @@ public class MainActivity extends BaseDrawerLayoutActivity
      *
      * @param e e
      */
-    @Override public void onFailure(Throwable e) {
+    @Override
+    public void onFailure(Throwable e) {
+        e.printStackTrace();
+        Log.e(TAG, "onFailure: " + e.getLocalizedMessage());
         this.refresh(false);
         this.setRefreshStatus(true);
         Snackbar.make(this.mainRv, R.string.main_load_error, Snackbar.LENGTH_SHORT).show();
     }
 
 
-    @Override protected void onDestroy() {
+    @Override
+    protected void onDestroy() {
         this.presenter.detachView();
         super.onDestroy();
     }
@@ -434,7 +459,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
      *
      * @return int[]
      */
-    @Override protected int[] getMenuItemIds() {
+    @Override
+    protected int[] getMenuItemIds() {
         return GankTypeDict.menuIds;
     }
 
@@ -447,7 +473,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
      *
      * @param now Now you choose the item
      */
-    @Override protected void onMenuItemOnClick(MenuItem now) {
+    @Override
+    protected void onMenuItemOnClick(MenuItem now) {
         if (GankTypeDict.menuId2TypeDict.indexOfKey(now.getItemId()) >= 0) {
             this.changeGankType(GankTypeDict.menuId2TypeDict.get(now.getItemId()));
         }
@@ -466,7 +493,8 @@ public class MainActivity extends BaseDrawerLayoutActivity
     }
 
 
-    @Override public void onClickPicture(String url, String title, View view) {
+    @Override
+    public void onClickPicture(String url, String title, View view) {
         PictureActivity.startActivityByActivityOptionsCompat(this, url, title, view);
     }
 

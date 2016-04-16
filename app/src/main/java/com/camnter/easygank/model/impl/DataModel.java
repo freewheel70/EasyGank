@@ -24,9 +24,12 @@
 
 package com.camnter.easygank.model.impl;
 
+import android.util.Log;
+
 import com.camnter.easygank.bean.GankData;
-import com.camnter.easygank.gank.EasyGank;
+import com.camnter.easygank.network.EasyGank;
 import com.camnter.easygank.model.IDataModel;
+
 import rx.Observable;
 
 /**
@@ -35,6 +38,8 @@ import rx.Observable;
  * Time：2016-01-06 17:50
  */
 public class DataModel implements IDataModel {
+
+    private static final String TAG = "DataModel";
 
     private static final DataModel ourInstance = new DataModel();
 
@@ -56,7 +61,11 @@ public class DataModel implements IDataModel {
      * @param page 第几页
      * @return Observable<GankData>
      */
-    @Override public Observable<GankData> getData(String type, int size, int page) {
-        return EasyGank.getInstance().getGankService().getData(type, size, page);
+    @Override
+    public Observable<GankData> getData(String type, int size, int page) {
+        Log.d(TAG, "getData() called with: " + "type = [" + type + "], size = [" + size + "], page = [" + page + "]");
+        return EasyGank.getInstance()
+                .getGankService()
+                .getData(type, size, page);
     }
 }

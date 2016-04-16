@@ -36,15 +36,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.camnter.easygank.R;
 import com.camnter.easygank.bean.BaseGankData;
-import com.camnter.easygank.gank.GankType;
-import com.camnter.easygank.gank.GankTypeDict;
+import com.camnter.easygank.network.GankType;
+import com.camnter.easygank.network.GankTypeDict;
 import com.camnter.easygank.utils.GlideUtils;
 import com.camnter.easygank.utils.ResourcesUtils;
 import com.camnter.easygank.widget.RatioImageView;
 import com.camnter.easyrecyclerview.adapter.EasyRecyclerViewAdapter;
 import com.camnter.easyrecyclerview.holder.EasyRecyclerViewHolder;
+
 import java.util.List;
 
 /**
@@ -96,24 +98,27 @@ public class DailyDetailAdapter extends EasyRecyclerViewAdapter {
     }
 
 
-    @Override public int[] getItemLayouts() {
-        return new int[] { R.layout.item_daily_detail };
+    @Override
+    public int[] getItemLayouts() {
+        return new int[]{R.layout.item_daily_detail};
     }
 
 
     @Override
     public void onBindRecycleViewHolder(EasyRecyclerViewHolder easyRecyclerViewHolder, int position) {
         List<BaseGankData> categoryData = this.getItem(position);
-        if (categoryData == null || categoryData.size() <= 0) return;
-        LinearLayout detailLL = easyRecyclerViewHolder.findViewById(R.id.daily_detail_ll);
+        if (categoryData == null || categoryData.size() <= 0) {
+            return;
+        }
+        LinearLayout detailContainer = easyRecyclerViewHolder.findViewById(R.id.daily_detail_ll);
 
-        detailLL.removeAllViews();
+        detailContainer.removeAllViews();
         for (int i = 0; i < categoryData.size(); i++) {
             final BaseGankData baseGankData = categoryData.get(i);
             if (i == 0) {
                 TextView categoryTV = this.createCardCategory(baseGankData.type);
-                detailLL.addView(categoryTV);
-                detailLL.addView(this.createDivider());
+                detailContainer.addView(categoryTV);
+                detailContainer.addView(this.createDivider());
             }
             if (GankTypeDict.urlType2TypeDict.get(baseGankData.type) == GankType.welfare) {
                 RatioImageView welfareIV = this.createRatioImageView();
@@ -124,23 +129,24 @@ public class DailyDetailAdapter extends EasyRecyclerViewAdapter {
                                 baseGankData.url, baseGankData.desc, v);
                     }
                 });
-                detailLL.addView(welfareIV);
+                detailContainer.addView(welfareIV);
             } else {
                 TextView itemText = this.createCardItemText(baseGankData);
-                detailLL.addView(itemText);
+                detailContainer.addView(itemText);
             }
         }
     }
 
 
-    @Override public int getRecycleViewItemType(int i) {
+    @Override
+    public int getRecycleViewItemType(int i) {
         return 0;
     }
 
 
     private TextView createCardItemText(BaseGankData baseGankData) {
         TextView itemText = (TextView) LayoutInflater.from(this.context)
-                                                     .inflate(R.layout.view_card_item, null);
+                .inflate(R.layout.view_card_item, null);
         itemText.setPadding(this.cardItemPadding, this.cardItemPadding, this.cardItemPadding,
                 this.cardItemPadding);
         String content = baseGankData.desc.trim() +
@@ -190,7 +196,7 @@ public class DailyDetailAdapter extends EasyRecyclerViewAdapter {
 
     private RatioImageView createRatioImageView() {
         return (RatioImageView) LayoutInflater.from(this.context)
-                                              .inflate(R.layout.view_card_radio_view, null);
+                .inflate(R.layout.view_card_radio_view, null);
     }
 
 

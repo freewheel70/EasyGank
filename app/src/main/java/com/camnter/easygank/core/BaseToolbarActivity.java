@@ -31,8 +31,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import butterknife.Bind;
+
 import com.camnter.easygank.R;
+
+import butterknife.Bind;
 
 /**
  * Description：BaseToolbarActivity
@@ -41,18 +43,21 @@ import com.camnter.easygank.R;
  */
 public abstract class BaseToolbarActivity extends BaseAppCompatActivity {
 
-    @Bind(R.id.toolbar) protected Toolbar mToolbar;
-    @Bind(R.id.app_bar_layout) protected AppBarLayout mAppBarLayout;
+    @Bind(R.id.toolbar)
+    protected Toolbar mToolbar;
+
+    @Bind(R.id.app_bar_layout)
+    protected AppBarLayout mAppBarLayout;
 
     protected ActionBarHelper mActionBarHelper;
-
 
     /**
      * Initialize the toolbar in the layout
      *
      * @param savedInstanceState savedInstanceState
      */
-    @Override protected void initToolbar(Bundle savedInstanceState) {
+    @Override
+    protected void initToolbar(Bundle savedInstanceState) {
         this.initToolbarHelper();
     }
 
@@ -80,7 +85,8 @@ public abstract class BaseToolbarActivity extends BaseAppCompatActivity {
      * proceed, true to consume it here.
      * @see #onCreateOptionsMenu
      */
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             this.onBackPressed();
             return true;

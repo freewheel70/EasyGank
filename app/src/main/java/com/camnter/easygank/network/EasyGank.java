@@ -22,12 +22,15 @@
  * <http://www.gnu.org/philosophy/why-not-lgpl.html>.
  */
 
-package com.camnter.easygank.gank;
+package com.camnter.easygank.network;
 
+import com.camnter.easygank.BuildConfig;
 import com.camnter.easygank.EasyApplication;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Response;
+
 import java.util.concurrent.TimeUnit;
+
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 import retrofit.RxJavaCallAdapterFactory;
@@ -45,33 +48,36 @@ public class EasyGank {
 
 
     public static EasyGank getInstance() {
-        if (ourInstance == null) ourInstance = new EasyGank();
+        if (ourInstance == null) {
+            ourInstance = new EasyGank();
+        }
         return ourInstance;
     }
 
 
     private EasyGank() {
+        // TODO: 2016/4/16 Hong  优化okHttpClient
         OkHttpClient okHttpClient = new OkHttpClient();
         okHttpClient.setReadTimeout(7676, TimeUnit.MILLISECONDS);
 
         /*
          * 查看网络请求发送状况
          */
-        if (EasyApplication.getInstance().log) {
-            okHttpClient.interceptors().add(chain -> {
-                Response response = chain.proceed(chain.request());
-                com.orhanobut.logger.Logger.d(chain.request().urlString());
-                return response;
-            });
+        if (BuildConfig.SHOULD_LOG) {
+            okHttpClient.interceptors()
+                    .add(chain -> {
+                        Response response = chain.proceed(chain.request());
+                        com.orhanobut.logger.Logger.d(chain.request().urlString());
+                        return response;
+                    });
         }
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl(GankApi.BASE_URL)
-                                                  .addCallAdapterFactory(
-                                                          RxJavaCallAdapterFactory.create())
-                                                  .addConverterFactory(GsonConverterFactory.create(
-                                                          EasyApplication.getInstance().gson))
-                                                  .client(okHttpClient)
-                                                  .build();
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(EasyApplication.getInstance().gson))
+                .client(okHttpClient)
+                .build();
+
         this.gankService = retrofit.create(GankService.class);
     }
 

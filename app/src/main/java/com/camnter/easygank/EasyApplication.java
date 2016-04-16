@@ -28,7 +28,7 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 import com.anupcowkur.reservoir.Reservoir;
-import com.camnter.easygank.gank.GankApi;
+import com.camnter.easygank.network.GankApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.orhanobut.logger.Logger;

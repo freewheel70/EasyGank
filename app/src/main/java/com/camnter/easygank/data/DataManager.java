@@ -30,8 +30,10 @@ import com.camnter.easygank.model.impl.DailyModel;
 import com.camnter.easygank.model.impl.DataModel;
 import com.camnter.easygank.presenter.MainPresenter;
 import com.camnter.easygank.utils.RxUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import rx.Observable;
 
 /**
@@ -63,29 +65,29 @@ public class DataManager {
 
     public Observable<List<GankDaily>> getDailyDataByNetwork(MainPresenter.EasyDate currentDate) {
         return Observable.just(currentDate)
-                         .flatMapIterable(MainPresenter.EasyDate::getPastTime)
-                         .flatMap(easyDate -> {
+                .flatMapIterable(MainPresenter.EasyDate::getPastTime)
+                .flatMap(easyDate -> {
                     /*
                      * 感觉Android的数据应该不会为null
                      * 所以以Android的数据为判断是否当天有数据
                      */
-                             return this.dailyModel.getDaily(easyDate.getYear(),
-                                     easyDate.getMonth(), easyDate.getDay())
-                                                   .filter(dailyData ->
-                                                           dailyData.results.androidData != null);
-                         })
-                         .toSortedList((dailyData, dailyData2) -> {
-                             return dailyData2.results.androidData.get(0).publishedAt.compareTo(
-                                     dailyData.results.androidData.get(0).publishedAt);
-                         })
-                         .compose(RxUtils.applyIOToMainThreadSchedulers());
+                    return this.dailyModel.getDaily(easyDate.getYear(),
+                            easyDate.getMonth(), easyDate.getDay())
+                            .filter(dailyData ->
+                                    dailyData.results.androidData != null);
+                })
+                .toSortedList((dailyData, dailyData2) -> {
+                    return dailyData2.results.androidData.get(0).publishedAt.compareTo(
+                            dailyData.results.androidData.get(0).publishedAt);
+                })
+                .compose(RxUtils.applyIOToMainThreadSchedulers());
     }
 
 
     public Observable<ArrayList<BaseGankData>> getDataByNetWork(String type, int size, int page) {
-        return this.dataModel.getData(type, size, page)
-                             .map(gankData -> gankData.results)
-                             .compose(RxUtils.applyIOToMainThreadSchedulers());
+        return dataModel.getData(type, size, page)
+                .map(gankData -> gankData.results)
+                .compose(RxUtils.applyIOToMainThreadSchedulers());
     }
 
 

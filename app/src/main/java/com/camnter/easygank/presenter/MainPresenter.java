@@ -24,14 +24,16 @@
 
 package com.camnter.easygank.presenter;
 
+import android.util.Log;
+
 import com.anupcowkur.reservoir.ReservoirGetCallback;
 import com.camnter.easygank.bean.BaseGankData;
 import com.camnter.easygank.bean.GankDaily;
 import com.camnter.easygank.constant.Constant;
 import com.camnter.easygank.core.mvp.BasePresenter;
-import com.camnter.easygank.gank.GankApi;
-import com.camnter.easygank.gank.GankType;
-import com.camnter.easygank.gank.GankTypeDict;
+import com.camnter.easygank.network.GankApi;
+import com.camnter.easygank.network.GankType;
+import com.camnter.easygank.network.GankTypeDict;
 import com.camnter.easygank.presenter.iview.MainView;
 import com.camnter.easygank.utils.DateUtils;
 import com.camnter.easygank.utils.ReservoirUtils;
@@ -52,6 +54,8 @@ import rx.Subscriber;
  * Time：2016-01-03 18:09
  */
 public class MainPresenter extends BasePresenter<MainView> {
+
+    private static final String TAG = "MainPresenter";
 
     private EasyDate currentDate;
     private int page;
@@ -87,7 +91,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                  * - (page * DateUtils.ONE_DAY) 翻到哪页再找 一页有DEFAULT_DAILY_SIZE这么长
                  * - i * DateUtils.ONE_DAY 往前一天一天 找呀找
                  */
-                long time = this.calendar.getTimeInMillis() - ((page - 1) * GankApi.DEFAULT_DAILY_SIZE * DateUtils.ONE_DAY) - i * DateUtils.ONE_DAY;
+                long time = calendar.getTimeInMillis() - ((page - 1) * GankApi.DEFAULT_DAILY_SIZE * DateUtils.ONE_DAY) - i * DateUtils.ONE_DAY;
                 Calendar c = Calendar.getInstance();
                 c.setTimeInMillis(time);
                 EasyDate date = new EasyDate(c);
@@ -100,12 +104,12 @@ public class MainPresenter extends BasePresenter<MainView> {
 
 
     public MainPresenter() {
-        this.reservoirUtils = new ReservoirUtils();
+        reservoirUtils = new ReservoirUtils();
         long time = System.currentTimeMillis();
         Calendar mCalendar = Calendar.getInstance();
         mCalendar.setTimeInMillis(time);
-        this.currentDate = new EasyDate(mCalendar);
-        this.page = 1;
+        currentDate = new EasyDate(mCalendar);
+        page = 1;
     }
 
     /**
@@ -137,9 +141,9 @@ public class MainPresenter extends BasePresenter<MainView> {
          * 切换数据源的话,尝试页数1
          */
         if (oldPage != GankTypeDict.DONT_SWITCH) {
-            this.page = 1;
+            page = 1;
         }
-        this.mCompositeSubscription.add(this.mDataManager.getDailyDataByNetwork(this.currentDate)
+        mCompositeSubscription.add(mDataManager.getDailyDataByNetwork(currentDate)
                 .subscribe(new Subscriber<List<GankDaily>>() {
                     @Override
                     public void onCompleted() {
@@ -220,72 +224,78 @@ public class MainPresenter extends BasePresenter<MainView> {
             this.page = 1;
         }
         String gankType = GankTypeDict.type2UrlTypeDict.get(type);
-        if (gankType == null) return;
-        this.mCompositeSubscription.add(this.mDataManager.getDataByNetWork(gankType, GankApi.DEFAULT_DATA_SIZE, this.page)
-                .subscribe(new Subscriber<ArrayList<BaseGankData>>() {
-                    @Override
-                    public void onCompleted() {
-                        if (MainPresenter.this.mCompositeSubscription != null)
-                            MainPresenter.this.mCompositeSubscription.remove(this);
-                    }
+        Log.d(TAG, "getData: gankType " + gankType);
+        if (gankType == null)
+            return;
 
-                    @Override
-                    public void onError(Throwable e) {
-                        try {
-                            Logger.d(e.getMessage());
-                        } catch (Throwable e1) {
-                            e1.getMessage();
-                        } finally {
-                            if (refresh) {
-                                Type resultType = new TypeToken<ArrayList<BaseGankData>>() {
-                                }.getType();
-                                MainPresenter.this.reservoirUtils.get(type + "", resultType, new ReservoirGetCallback<ArrayList<BaseGankData>>() {
-                                    @Override
-                                    public void onSuccess(ArrayList<BaseGankData> object) {
-                                        // 有缓存显示缓存数据
-                                        if (oldPage != GankTypeDict.DONT_SWITCH) {
-                                            if (MainPresenter.this.getMvpView() != null)
-                                                MainPresenter.this.getMvpView().onSwitchSuccess(type);
-                                        }
-                                        if (MainPresenter.this.getMvpView() != null)
-                                            MainPresenter.this.getMvpView().onGetDataSuccess(object, refresh);
-                                        if (MainPresenter.this.getMvpView() != null)
-                                            MainPresenter.this.getMvpView().onFailure(e);
-                                    }
-
-                                    @Override
-                                    public void onFailure(Exception e) {
-                                        MainPresenter.this.switchFailure(oldPage, e);
-                                    }
-                                });
-                            } else {
-//                                MainPresenter.this.switchFailure(oldPage, e);
-                                // 加载更多失败
-                                MainPresenter.this.getMvpView().onFailure(e);
+        this.mCompositeSubscription.add(
+                this.mDataManager.getDataByNetWork(gankType, GankApi.DEFAULT_DATA_SIZE, this.page)
+                        .subscribe(new Subscriber<ArrayList<BaseGankData>>() {
+                            @Override
+                            public void onCompleted() {
+                                if (MainPresenter.this.mCompositeSubscription != null)
+                                    MainPresenter.this.mCompositeSubscription.remove(this);
                             }
-                        }
-                    }
 
-                    @Override
-                    public void onNext(ArrayList<BaseGankData> baseGankData) {
+                            @Override
+                            public void onError(Throwable e) {
+                                e.printStackTrace();
+                                Log.e(TAG, "onError: " + e.getLocalizedMessage());
+                                try {
+                                    Logger.d(e.getMessage());
+                                } catch (Throwable e1) {
+                                    e1.getMessage();
+                                } finally {
+                                    if (refresh) {
+                                        Type resultType = new TypeToken<ArrayList<BaseGankData>>() {
+                                        }.getType();
+                                        MainPresenter.this.reservoirUtils.get(type + "", resultType, new ReservoirGetCallback<ArrayList<BaseGankData>>() {
+                                            @Override
+                                            public void onSuccess(ArrayList<BaseGankData> object) {
+                                                // 有缓存显示缓存数据
+                                                if (oldPage != GankTypeDict.DONT_SWITCH) {
+                                                    if (MainPresenter.this.getMvpView() != null)
+                                                        MainPresenter.this.getMvpView().onSwitchSuccess(type);
+                                                }
+                                                if (MainPresenter.this.getMvpView() != null)
+                                                    MainPresenter.this.getMvpView().onGetDataSuccess(object, refresh);
+                                                if (MainPresenter.this.getMvpView() != null)
+                                                    MainPresenter.this.getMvpView().onFailure(e);
+                                            }
+
+                                            @Override
+                                            public void onFailure(Exception e) {
+                                                MainPresenter.this.switchFailure(oldPage, e);
+                                            }
+                                        });
+                                    } else {
+//                                MainPresenter.this.switchFailure(oldPage, e);
+                                        // 加载更多失败
+                                        MainPresenter.this.getMvpView().onFailure(e);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onNext(ArrayList<BaseGankData> baseGankData) {
                         /*
                          * 如果是切换数据源
                          * page=1加载成功了
                          * 即刚才的loadPage
                          */
-                        if (oldPage != GankTypeDict.DONT_SWITCH) {
-                            if (MainPresenter.this.getMvpView() != null)
-                                MainPresenter.this.getMvpView().onSwitchSuccess(type);
-                        }
-                        // 刷新缓存
-                        if (refresh)
-                            MainPresenter.this.reservoirUtils.refresh(type + "", baseGankData);
-                        if (MainPresenter.this.getMvpView() != null)
-                            MainPresenter.this.getMvpView().onGetDataSuccess(baseGankData, refresh);
+                                if (oldPage != GankTypeDict.DONT_SWITCH) {
+                                    if (MainPresenter.this.getMvpView() != null)
+                                        MainPresenter.this.getMvpView().onSwitchSuccess(type);
+                                }
+                                // 刷新缓存
+                                if (refresh)
+                                    MainPresenter.this.reservoirUtils.refresh(type + "", baseGankData);
+                                if (MainPresenter.this.getMvpView() != null)
+                                    MainPresenter.this.getMvpView().onGetDataSuccess(baseGankData, refresh);
 
 
-                    }
-                }));
+                            }
+                        }));
 
     }
 
@@ -297,7 +307,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         int oldPage = this.page;
         switch (type) {
             case GankType.daily:
-                this.getDaily(true, oldPage);
+                getDaily(true, oldPage);
                 break;
             case GankType.android:
             case GankType.ios:
@@ -306,14 +316,14 @@ public class MainPresenter extends BasePresenter<MainView> {
             case GankType.welfare:
             case GankType.video:
             case GankType.app:
-                this.getData(type, true, oldPage);
+                getData(type, true, oldPage);
                 break;
         }
     }
 
 
     public void getDailyDetail(final GankDaily.DailyResults results) {
-        this.mCompositeSubscription.add(this.mDataManager.getDailyDetailByDailyResults(results)
+        mCompositeSubscription.add(mDataManager.getDailyDetailByDailyResults(results)
                 .subscribe(new Subscriber<ArrayList<ArrayList<BaseGankData>>>() {
                     @Override
                     public void onCompleted() {

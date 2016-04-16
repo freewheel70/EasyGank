@@ -25,11 +25,14 @@
 package com.camnter.easygank.utils;
 
 import android.util.Log;
+
 import com.anupcowkur.reservoir.Reservoir;
 import com.anupcowkur.reservoir.ReservoirDeleteCallback;
 import com.anupcowkur.reservoir.ReservoirGetCallback;
 import com.anupcowkur.reservoir.ReservoirPutCallback;
+
 import java.lang.reflect.Type;
+
 import rx.Observable;
 
 /**
@@ -55,12 +58,14 @@ public class ReservoirUtils {
     public void put(String key, Object object) {
         if (object == null) return;
         Reservoir.putAsync(key, object, new ReservoirPutCallback() {
-            @Override public void onSuccess() {
+            @Override
+            public void onSuccess() {
                 Log.i(TAG, "Put success: key=" + key + " object=" + object.getClass());
             }
 
 
-            @Override public void onFailure(Exception e) {
+            @Override
+            public void onFailure(Exception e) {
                 e.printStackTrace();
             }
         });
@@ -85,12 +90,14 @@ public class ReservoirUtils {
     public void refresh(String key, Object object) {
         if (this.contains(key)) {
             Reservoir.deleteAsync(key, new ReservoirDeleteCallback() {
-                @Override public void onSuccess() {
+                @Override
+                public void onSuccess() {
                     ReservoirUtils.this.put(key, object);
                 }
 
 
-                @Override public void onFailure(Exception e) {
+                @Override
+                public void onFailure(Exception e) {
                     e.printStackTrace();
                 }
             });
